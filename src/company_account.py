@@ -5,6 +5,7 @@ class Company_Account(Account):
         self.balance = 0.0
         self.company_name = company_name
         self.nip = nip if self.is_nip_valid(nip) else "INVALID"
+        self.history=[]
 
     def is_nip_valid(self,nip):
         return isinstance(nip, str) and len(nip) == 10

@@ -6,6 +6,7 @@ class Personal_Account(Account):
         self.last_name = last_name
         self.pesel = pesel if self.is_pesel_valid(pesel) else "INVALID"
         self.balance = 50.0 if self.check_promo_code(promo_code) and self.check_age_viable(pesel) else 0.0
+        self.history = []
     
     def is_pesel_valid(self,pesel):
         return isinstance(pesel, str) and len(pesel) == 11
