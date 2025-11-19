@@ -16,3 +16,17 @@ class Personal_Account(Account):
     
     def check_age_viable(self,pesel):
         return int(pesel[:2]) > 60 or int(pesel[2]) > 2
+
+    def submit_for_loan(self, amount):
+        if len(self.history) < 5:
+            return False
+        sum=0
+        for i in range(5):
+            if i<3:
+                if self.history[-1-i] < 0.0:
+                    return False
+            sum+=self.history[-1-i]
+        if sum < amount:
+            return False
+        self.balance += amount
+        return True 
