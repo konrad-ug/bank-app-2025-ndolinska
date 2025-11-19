@@ -1,7 +1,7 @@
 from src.personal_account import Personal_Account
 import pytest # pyright: ignore[reportMissingImports]
 class Test_Submit_For_Loan():
-
+ 
     @pytest.fixture()
     def acc(self):
         acc = Personal_Account("John", "Doe", "5443222277")
