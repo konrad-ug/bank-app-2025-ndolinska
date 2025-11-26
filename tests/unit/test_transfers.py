@@ -1,87 +1,75 @@
 from src.personal_account import Personal_Account
 from src.company_account import Company_Account
 from src.account import Account
+import pytest # pyright: ignore[reportMissingImports]
+
+#Zmieniono tutaj zwykłe testy na fixtures
 #====================TESTY PODSTAWOWYCH PRZELEWÓW ===============================
 class TestTransfers:
-    def test_transfer_incoming(self):
-        account = Account()
-        account.transfer_incoming(200)
-        assert account.balance == 200.0
+    @pytest.fixture()
+    def acc(self):
+        acc = Account()
+        return acc
+    @pytest.mark.parametrize("balance, amount_in, amount_out, expected_balance",[
+        (0.0,200.0,0.0,200.0),
+        (0.0,"przelew",0.0,0.0),
+        (0.0,-50.0,0.0,0.0),
+        (0.0,55.0,50.0,5.0),
+        (0.0,0.0,"przelew",0.0),
+        (0.0,0.0,-10.0,0.0),
+        (0.0,0.0,10.0,0.0)
+        ],ids=[
+            "incoming success",
+            "incoming not a number",
+            "incoming a negative amount",
+            "outgoing success",
+            "outgoing not a number",
+            "outgoing a negative amount",
+            "outgoing not enough balance"
+        ])
+    def test_incoming_outgoing(self, acc, balance, amount_in, amount_out, expected_balance):
+        acc.balance = balance
+        acc.transfer_incoming(amount_in)
+        acc.transfer_outgoing(amount_out)
+        assert acc.balance == expected_balance
 
-    def test_transfer_incoming_notnum(self):
-        account =Account()
-        account.transfer_incoming("przelew")
-        assert account.balance == 0.0
-
-    def test_transfer_incoming_negative(self):
-        account = Account()
-        account.transfer_incoming(-50.0)
-        assert account.balance == 0.0
-
-    def test_transfer_outgoing(self):
-        account = Account()
-        account.transfer_incoming(50.0)
-        account.transfer_outgoing(50.0)
-        assert account.balance == 0.0
-
-    def test_transfer_outgoing_negative(self):
-        account = Account()
-        account.transfer_outgoing(-60)
-        assert account.balance == 0.0
-    
-    def test_transfer_outgoing_notnum(self):
-        account = Account()
-        account.transfer_outgoing("przelew")
-        assert account.balance == 0.0
-    
-    def test_transfer_outgoing_not_enough_balance(self):
-        account = Account()
-        account.transfer_outgoing(60.0)
-        assert account.balance == 0.0
-
-    def test_both_transfers(self):
-        account = Account()
-        account.transfer_incoming(200)
-        account.transfer_outgoing(50)
-        assert account.balance == 150.0
-  
 #====================TESTY PRZELEWÓW EKSPRESOWYCH ===============================
-class TestExpressTransfer:
+class TestExpressTransferPersonal:
 # PRZELEWY Z KONTA OSOBISTEGO
-    def test_personal_account_transfer_express(self):
+   @pytest.fixture()
+   def acc(self):
         acc = Personal_Account("John", "Doe", "5443222277")
-        acc.transfer_incoming(100.0)
-        acc.transfer_express_outgoing(40.0)
-        assert acc.balance == 59.0
-
-    def test_personal_account_transfer_express_not_enough_balance(self):
-        acc = Personal_Account("John", "Doe", "5443222277")
-        acc.transfer_incoming(30.0)
-        acc.transfer_express_outgoing(40.0)
-        assert acc.balance == 30.0
-
-    def test_personal_account_transfer_express_fee_debit(self):
-        acc = Personal_Account("John", "Doe", "5443222277")
-        acc.transfer_incoming(30.0)
-        acc.transfer_express_outgoing(30.0)
-        assert acc.balance == -1.0
-        
+        return acc
+   @pytest.mark.parametrize("balance, amount_in, amount_out, expected_balance",[
+       (0.0,100.0,40.0,59.0),
+       (0.0,30.0,40.0,30.0),
+       (0.0,30.0,30.0,-1.0)
+   ],ids=[
+   "express_success",
+   "not enough balance",
+   "test fee debit"])
+   def test_express_personal(self,acc,balance,amount_in,amount_out,expected_balance):
+       acc.balance = balance
+       acc.transfer_incoming(amount_in)
+       acc.transfer_express_outgoing(amount_out)
+       assert acc.balance == expected_balance
 # PRZELEWY Z KONTA FIRMOWEGO
-    def test_company_account_transfer_express(self):
-        acc = Company_Account("ABC","544322227")
-        acc.transfer_incoming(100.0)
-        acc.transfer_express_outgoing(40.0)
-        assert acc.balance == 55.0
-
-    def test_company_account_transfer_express_not_enough_balance(self):
-        acc = Company_Account("ABC", "544322227")
-        acc.transfer_incoming(30.0)
-        acc.transfer_express_outgoing(36.0)
-        assert acc.balance == 30.0
-
-    def test_company_account_transfer_express_fee_debit(self):
-        acc = Company_Account("ABC", "544322227")
-        acc.transfer_incoming(30.0)
-        acc.transfer_express_outgoing(30.0)
-        assert acc.balance == -5.0
+class TestExpressCompany:
+   @pytest.fixture()
+   def acc(self):
+        acc = Company_Account("ABC", "544322277")
+        return acc
+   @pytest.mark.parametrize("balance, amount_in, amount_out, expected_balance",[
+       (0.0,100.0,40.0,55.0),
+       (0.0,30.0,40.0,30.0),
+       (0.0,30.0,30.0,-5.0)
+   ],ids=[
+   "express_success",
+   "not enough balance",
+   "test fee debit"])
+   def test_express_personal(self,acc,balance,amount_in,amount_out,expected_balance):
+       acc.balance = balance
+       acc.transfer_incoming(amount_in)
+       acc.transfer_express_outgoing(amount_out)
+       assert acc.balance == expected_balance
 
