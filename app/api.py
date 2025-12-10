@@ -10,9 +10,9 @@ registry = AccountRegistry()
 def create_account():
     data = request.get_json()
     print(f"Create account request: {data}")
-    if registry.search_account(data["pesel"]):
+    if registry.search_account(data['pesel']):
         return jsonify({"message": "Account with this pesel already exists"}), 409
-    account = Personal_Account(data["first_name"], data["last_name"], data["pesel"])
+    account = Personal_Account(data['first_name'], data['last_name'], data['pesel'])
     registry.add_account(account)
     return jsonify({"message": "Account created"}), 201
 
@@ -20,7 +20,7 @@ def create_account():
 def get_all_accounts():
     print("Get all accounts request received")
     accounts = registry.get_all()
-    accounts_data = [{"first_name": acc.first_name, "last_name": acc.last_name, "pesel":
+    accounts_data = [{"first_name": acc.first_name, "last_name": acc.last_name, 'pesel':
     acc.pesel, "balance": acc.balance} for acc in accounts]
     return jsonify(accounts_data), 200
 
@@ -37,7 +37,7 @@ def get_account_by_pesel(pesel):
             return jsonify({
                 "first_name": account.first_name,
                 "last_name": account.last_name,
-                "pesel": account.pesel,
+                'pesel': account.pesel,
                 "balance": account.balance
             }), 200
     else:
@@ -50,9 +50,9 @@ def update_account(pesel):
         return jsonify({"message": "Account not found"}), 404
     data = request.get_json()
     if "first_name" in data:
-        account.first_name = data["first_name"]
+        account.first_name = data['first_name']
     if "last_name" in data:
-        account.last_name = data["last_name"]
+        account.last_name = data['last_name']
     return jsonify({"message": "Account updated"}), 200
 @app.route("/api/accounts/<pesel>", methods=['DELETE'])
 def delete_account(pesel):
@@ -72,8 +72,8 @@ def transfer(pesel):
     account = registry.search_account(pesel)
     if not account:
         return jsonify({"message":"Account not found"}), 404
-    amount = data["amount"]
-    transfer_type = data["type"]
+    amount = data['amount']
+    transfer_type = data['type']
     transfer_map = {
         "incoming": account.transfer_incoming,
         "outgoing":account.transfer_outgoing,
