@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from src.account_registry import AccountRegistry
 from src.personal_account import Personal_Account
+from src.account import Account
 
 app = Flask(__name__)
 registry = AccountRegistry()
@@ -9,7 +10,8 @@ registry = AccountRegistry()
 def create_account():
     data = request.get_json()
     print(f"Create account request: {data}")
-
+    if registry.search_account(data["pesel"]):
+        return jsonify({"message": "Account with this pesel already exists"}), 409
     account = Personal_Account(data["first_name"], data["last_name"], data["pesel"])
     registry.add_account(account)
     return jsonify({"message": "Account created"}), 201
@@ -56,9 +58,32 @@ def update_account(pesel):
 def delete_account(pesel):
     print(f"Delete account by pesel: {pesel}")
     account = registry.search_account(pesel)
-    
     if not account:
         return jsonify({"message": "Account not found"}), 404
     registry.accounts.remove(account)
-    
     return jsonify({"message": "Account deleted"}), 200
+
+# Implementacja przelewów
+@app.route("/api/accounts/<pesel>/transfer", methods=['POST'])
+def transfer(pesel):
+    data = request.get_json()
+    if not data or "amount" not in data or "type" not in data:
+        return jsonify({"message":"Request body must containt amount and type"}), 400
+    account = registry.search_account(pesel)
+    if not account:
+        return jsonify({"message":"Account not found"}), 404
+    amount = data["amount"]
+    transfer_type = data["type"]
+    transfer_map = {
+        "incoming": account.transfer_incoming,
+        "outgoing":account.transfer_outgoing,
+        "express":account.transfer_express_outgoing
+    }
+    if transfer_type in transfer_map:
+        method = transfer_map[transfer_type]
+        success = method(amount)
+        if success:
+            return jsonify({"message":"Transfer successful"}), 200
+        else:
+            return jsonify({"message":"There was an issue with transfer"}), 422
+        
