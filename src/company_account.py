@@ -2,6 +2,7 @@ import os
 import datetime
 import requests
 from src.account import Account
+from smtp.smtp import SMTPClient
 class Company_Account(Account): # pragma: no cover
     express_fee = 5.0 
     def __init__(self, company_name, nip):
@@ -42,5 +43,12 @@ class Company_Account(Account): # pragma: no cover
         except requests.RequestException as e:
             print(f"API Connection Error: {e}")
             return False
+    def send_history_via_email(self, email):
+        today = datetime.date.today().strftime("%Y-%m-%d")
+        subject = f"Account Transfer History {today}"
+        text = f"Company account history: {self.history}"
+        
+        smtp = SMTPClient()
+        return smtp.send(subject, text, email)
 
     
