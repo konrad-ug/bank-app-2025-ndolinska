@@ -1,9 +1,11 @@
 from src.company_account import Company_Account
 import pytest # pyright: ignore[reportMissingImports]
+from pytest_mock import MockFixture
 class Test_Company_Loan():
  
     @pytest.fixture()
-    def acc(self):
+    def acc(self, mocker:MockFixture):
+        mocker.patch.object(Company_Account, 'verify_nip', return_value=True)
         acc = Company_Account("JANUSZEX", "1234567890")
         return acc
     @pytest.mark.parametrize("history, balance, amount, expected_result, expected_balance",[
