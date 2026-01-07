@@ -1,6 +1,7 @@
 from src.personal_account import Personal_Account
 from src.company_account import Company_Account
 from src.account import Account
+from pytest_mock import MockFixture
 import pytest # pyright: ignore[reportMissingImports]
 
 #Zmieniono tutaj zwykłe testy na fixtures
@@ -56,7 +57,8 @@ class TestExpressTransferPersonal:
 # PRZELEWY Z KONTA FIRMOWEGO
 class TestExpressCompany:
    @pytest.fixture()
-   def acc(self):
+   def acc(self, mocker:MockFixture):
+        mocker.patch.object(Company_Account, 'verify_nip', return_value=True)
         acc = Company_Account("ABC", "544322277")
         return acc
    @pytest.mark.parametrize("balance, amount_in, amount_out, expected_balance",[
@@ -67,7 +69,7 @@ class TestExpressCompany:
    "express_success",
    "not enough balance",
    "test fee debit"])
-   def test_express_personal(self,acc,balance,amount_in,amount_out,expected_balance):
+   def test_express_company(self,acc,balance,amount_in,amount_out,expected_balance):
        acc.balance = balance
        acc.transfer_incoming(amount_in)
        acc.transfer_express_outgoing(amount_out)

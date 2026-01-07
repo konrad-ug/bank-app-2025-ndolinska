@@ -1,6 +1,7 @@
 from src.personal_account import Personal_Account
 from src.company_account import Company_Account
 from src.account import Account
+from pytest_mock import MockFixture
 #TEST ZWYKLYCH PRZELEWOW
 class TestHistory:
     def test_transaction_incoming(self):
@@ -24,7 +25,8 @@ class TestExpressHistoryPersonal:
         assert account.history == [200.0,-200.0,-1.0]
 #TEST PRZELEWÓW EKSPRESOWYCH (KONTA FIRMOWE)
 class TestExpressHistoryCompany:
-     def test_express_outgoing(self):
+     def test_express_outgoing(self, mocker:MockFixture):
+        mocker.patch.object(Company_Account, 'verify_nip', return_value=True)
         account = Company_Account("ABC","544322227")
         account.transfer_incoming(200)
         account.transfer_express_outgoing(200)

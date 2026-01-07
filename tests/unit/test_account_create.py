@@ -1,5 +1,6 @@
 from src.personal_account import Personal_Account
 from src.company_account import Company_Account
+from pytest_mock import MockFixture
 
 #====================TESTY TWORZENIA PERSONAL ACCOUNT ===============================
 class TestPersonalAccount:
@@ -51,10 +52,12 @@ class TestPersonalAccount:
 
 #====================TESTY TWORZENIA COMPANY ACCOUNT ===============================
 class TestCompanyAccount:
-    def test_account_creation(self):
-        account = Company_Account("ABC", "544322227")
-        assert account.company_name == "ABC"
-        assert account.balance == 0.0
+    def test_company_account_creation(self, mocker:MockFixture ):
+        mocker.patch.object(Company_Account, 'verify_nip', return_value=True)
+        company_account = Company_Account("JANUSZEX", "1234567890")
+        assert company_account.company_name == "JANUSZEX"
+        assert company_account.balance == 0.0
+        assert company_account.nip == "1234567890"
         
     def test_nip_too_long(self):
         account = Company_Account("ABC","5443222271232327")
