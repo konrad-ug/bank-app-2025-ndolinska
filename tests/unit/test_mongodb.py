@@ -48,3 +48,33 @@ def test_load_all_returns_account_objects(mocker):
     assert loaded_accounts[0].pesel == "80010112345"
     assert loaded_accounts[0].balance == 250.0
     assert loaded_accounts[0].history == [50.0]
+
+def test_init_creates_client_when_no_collection_provided(mocker):
+    mock_mongo_cls = mocker.patch("src.mongo_accounts_repository.MongoClient")
+    mock_client_instance = mock_mongo_cls.return_value
+    
+    mock_db = mocker.Mock(name="mock_db")
+    expected_collection = mocker.Mock(name="mock_collection")
+    mock_client_instance.return_value = mock_db
+    mock_db.return_value = expected_collection
+    repo = MongoAccountsRepository()
+    assert repo._collection == expected_collection
+    mock_mongo_cls.assert_called_once()
+
+def test_load_all_using_mocker_style(mocker):
+    mock_collection = mocker.Mock()
+    
+    doc1 = {"first_name": "Jan", "last_name": "Kowalski", "pesel": "90010112345", "balance": 100.0, "history": []}
+    doc2 = {"first_name": "Anna", "last_name": "Nowak", "pesel": "80010154321", "balance": 200.0, "history": []}
+    
+    mock_collection.find.return_value = [doc1, doc2]
+
+    repo = MongoAccountsRepository(collection=mock_collection)
+
+    result = repo.load_all()
+
+    assert len(result) == 2
+    assert result[0].first_name == "Jan"
+    assert result[1].first_name == "Anna"
+    mock_collection.find.assert_called_once()
+
