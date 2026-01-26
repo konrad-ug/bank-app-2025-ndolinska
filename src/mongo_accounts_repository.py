@@ -13,8 +13,8 @@ class MongoAccountsRepository(AccountsRepository):
         collection_name = collection_name or os.getenv("MONGO_COLLECTION", "accounts")
 
         client = MongoClient(mongo_uri)
-        db = client(db_name)
-        self._collection = db(collection_name)
+        db = client[db_name]
+        self._collection = db[collection_name]
 
     def save_all(self, accounts):
         self._collection.delete_many({})

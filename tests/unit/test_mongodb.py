@@ -55,8 +55,8 @@ def test_init_creates_client_when_no_collection_provided(mocker):
     
     mock_db = mocker.Mock(name="mock_db")
     expected_collection = mocker.Mock(name="mock_collection")
-    mock_client_instance.return_value = mock_db
-    mock_db.return_value = expected_collection
+    mock_client_instance.__getitem__.return_value = mock_db
+    mock_db.__getitem__.return_value = expected_collection
     repo = MongoAccountsRepository()
     assert repo._collection == expected_collection
     mock_mongo_cls.assert_called_once()
